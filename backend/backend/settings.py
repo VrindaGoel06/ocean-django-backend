@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import environ
 import os
-from datetime import timedelta
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -36,8 +35,10 @@ DOMAIN = env("DOMAIN")
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-fl2l#pd+oy&^03rz#^0b&dfnri9ox)+*2hess-acqpnhfs&wt4"
 
-
-ALLOWED_HOSTS = []
+if DEBUG:
+    ALLOWED_HOSTS = ["*"]
+else:
+    ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
 
 
 # Application definition
