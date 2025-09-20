@@ -28,7 +28,7 @@ EMAIL_PORT = env.int("EMAIL_PORT")
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
 SECRET_KEY = env("SECRET_KEY")
 DOMAIN = env("DOMAIN")
-HTTPS_ENFORCED = env("HTTPS_ENFORCED", False)
+HTTPS_ENFORCED = env.bool("HTTPS_ENFORCED", default=False)
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
