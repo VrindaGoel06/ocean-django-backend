@@ -28,7 +28,7 @@ EMAIL_PORT = env.int("EMAIL_PORT")
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
 SECRET_KEY = env("SECRET_KEY")
 DOMAIN = env("DOMAIN")
-
+HTTPS_ENFORCED = env("HTTPS_ENFORCED")
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -39,6 +39,11 @@ if DEBUG:
     ALLOWED_HOSTS = ["*"]
 else:
     ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
+
+CSRF_COOKIE_SECURE = HTTPS_ENFORCED
+SESSION_COOKIE_SECURE = HTTPS_ENFORCED
+if HTTPS_ENFORCED:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
 # Application definition
@@ -59,6 +64,7 @@ AUTH_USER_MODEL = "accounts.User"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
