@@ -1,0 +1,8 @@
+.env
+.git
+.gitignore
+*/migrations/*
+*.pyc
+__pycache__
+.venv
+.vscode
