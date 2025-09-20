@@ -28,7 +28,7 @@ EMAIL_PORT = env.int("EMAIL_PORT")
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
 SECRET_KEY = env("SECRET_KEY")
 DOMAIN = env("DOMAIN")
-HTTPS_ENFORCED = env("HTTPS_ENFORCED")
+HTTPS_ENFORCED = env("HTTPS_ENFORCED", False)
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -146,3 +146,4 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+STATIC_ROOT = BASE_DIR / "staticfiles"
