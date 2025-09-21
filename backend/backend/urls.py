@@ -36,6 +36,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     # App APIs
     path("api/", include("accounts.urls")),
+    path("api/", include("hazards.urls")),
     # API Docs
     re_path(
         r"^swagger(?P<format>\.json|\.yaml)$",

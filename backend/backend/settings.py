@@ -19,7 +19,8 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env(DEBUG=(bool, False))
 environ.Env.read_env(os.path.join(BASE_DIR.parent, ".env"))
-DEBUG = env("DEBUG")
+DEBUG = env.bool("DEBUG", default=False)
+DEV = env.bool("DEV", default=False)
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = env("EMAIL_HOST")
 EMAIL_HOST_USER = env("EMAIL_USER")
@@ -29,6 +30,8 @@ EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
 SECRET_KEY = env("SECRET_KEY")
 DOMAIN = env("DOMAIN")
 HTTPS_ENFORCED = env.bool("HTTPS_ENFORCED", default=False)
+OPENROUTER_API_KEY = env("OPENROUTER_API_KEY")
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -58,7 +61,11 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_yasg",
     "accounts",
+    "hazards",
+    "common",
+    "leaflet",
 ]
+
 AUTH_USER_MODEL = "accounts.User"
 
 
@@ -72,6 +79,11 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+if DEV:
+    INSTALLED_APPS += ["django_extensions", "corsheaders"]
+    MIDDLEWARE = ["corsheaders.middleware.CorsMiddleware"] + MIDDLEWARE
+    CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = "backend.urls"
 
@@ -147,3 +159,6 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
