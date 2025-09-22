@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeerNetra - History</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+background-color: #f0f8ff;
+color: #0a3d62;
+max-width: 480px;
+margin: 0 auto;
+min-height: 100vh;
+position: relative;
+box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.container {
+padding: 20px;
+padding-bottom: 20px;
+}
+
+.header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 15px 0;
+border-bottom: 2px solid #0a3d62;
+margin-bottom: 20px;
+}
+
+.logo {
+font-size: 28px;
+font-weight: bold;
+color: #0a3d62;
+}
+
+.back-arrow {
+font-size: 24px;
+cursor: pointer;
+margin-right: 10px;
+}
+
+.section-title {
+font-size: 18px;
+margin: 15px 0;
+font-weight: bold;
+}
+
+.history-item {
+background-color: #d1e8ff;
+padding: 15px;
+border-radius: 8px;
+margin: 10px 0;
+border: 1px solid #0a3d62;
+}
+
+.history-item h3 {
+margin-bottom: 5px;
+color: #0a3d62;
+}
+
+.history-item p {
+margin: 3px 0;
+color: #1e5f8a;
+}
+
+.status {
+display: inline-block;
+padding: 3px 8px;
+border-radius: 12px;
+font-size: 12px;
+font-weight: bold;
+margin-top: 5px;
+}
+
+.status.resolved {
+background-color: #2ecc71;
+color: white;
+}
+
+.status.pending {
+background-color: #f39c12;
+color: white;
+}
+
+.status.in-progress {
+background-color: #3498db;
+color: white;
+}
+
+@media (max-width: 480px) {
+body {
+max-width: 100%;
+}
+
+.container {
+padding: 15px;
+padding-bottom: 20px;
+}
+}
+</style>
+</head>
+<body>
+<!-- History Page -->
+<div class="container">
+<div class="header">
+<div class="back-arrow">
+<i class="fas fa-arrow-left"></i>
+</div>
+<div class="logo">Neter<br>NETRA</div>
+<div style="width: 24px;"></div> <!-- Empty div for spacing -->
+</div>
+
+<div class="section-title">Your History</div>
+
+<div class="history-item">
+<h3>Oil spill spotted</h3>
+<p><strong>Date:</strong> 20/Sep/23</p>
+<p><strong>Location:</strong> Marina Beach, Chennai</p>
+<span class="status resolved">Resolved</span>
+</div>
+
+<div class="history-item">
+<h3>Illegal fishing activity</h3>
+<p><strong>Date:</strong> 18/Sep/23</p>
+<p><strong>Location:</strong> Arabian Sea, Goa</p>
+<span class="status in-progress">In Progress</span>
+</div>
+
+<div class="history-item">
+<h3>Coral bleaching</h3>
+<p><strong>Date:</strong> 15/Sep/23</p>
+<p><strong>Location:</strong> Andaman Islands</p>
+<span class="status resolved">Resolved</span>
+</div>
+
+<div class="history-item">
+<h3>Plastic pollution</h3>
+<p><strong>Date:</strong> 12/Sep/23</p>
+<p><strong>Location:</strong> Juhu Beach, Mumbai</p>
+<span class="status pending">Pending</span>
+</div>
+
+<div class="history-item">
+<h3>Coastal erosion</h3>
+<p><strong>Date:</strong> 10/Sep/23</p>
+<p><strong>Location:</strong> Puri Beach, Odisha</p>
+<span class="status in-progress">In Progress</span>
+</div>
+</div>
+</body>
+</html>

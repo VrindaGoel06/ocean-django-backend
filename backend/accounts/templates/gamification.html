@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>NeerNetra - Rewards & Gamification</title>
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #FFF7E6;
+            color: #102E4A;
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .container {
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 2px solid #102E4A;
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #102E4A;
+        }
+        
+        .user-icon {
+            font-size: 24px;
+            color: #102E4A;
+            cursor: pointer;
+        }
+        
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .stat-box {
+            background-color: #e8f1f9;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            flex: 1;
+            margin: 0 5px;
+            border: 1px solid #102E4A;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #102E4A;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #102E4A;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            margin: 20px 0 15px;
+            font-weight: bold;
+            color: #102E4A;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-right: 10px;
+        }
+        
+        .badges-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .badge {
+            width: 30%;
+            background-color: #e8f1f9;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 15px;
+            border: 1px solid #102E4A;
+        }
+        
+        .badge-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+            color: #102E4A;
+        }
+        
+        .badge.unearned {
+            opacity: 0.5;
+        }
+        
+        .badge-title {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .badge-desc {
+            font-size: 12px;
+            color: #102E4A;
+        }
+        
+        .progress-container {
+            margin-bottom: 20px;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .progress-bar {
+            height: 20px;
+            background-color: #e8f1f9;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #102E4A;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: #3498db;
+            border-radius: 10px;
+            width: 65%;
+        }
+        
+        .reward-item {
+            background-color: #e8f1f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid #102E4A;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .reward-date {
+            font-size: 14px;
+            color: #102E4A;
+        }
+        
+        .reward-points {
+            font-weight: bold;
+            color: #102E4A;
+            font-size: 18px;
+        }
+        
+        .reward-desc {
+            font-size: 14px;
+            color: #102E4A;
+            margin-top: 5px;
+        }
+        
+        .leaderboard-container {
+            margin-bottom: 20px;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #e8f1f9;
+        }
+        
+        .leaderboard-rank {
+            font-weight: bold;
+            width: 30px;
+            text-align: center;
+        }
+        
+        .leaderboard-user {
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+        
+        .leaderboard-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #102E4A;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 10px;
+        }
+        
+        .leaderboard-points {
+            font-weight: bold;
+            color: #102E4A;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #102E4A;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px;
+            max-width: 480px;
+            margin: 0 auto;
+            z-index: 90;
+        }
+        
+        .nav-icon {
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .center-icon {
+            background-color: #3498db;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: -10px;
+        }
+        
+        .level-badge {
+            background-color: #102E4A;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #102E4A;
+        }
+        
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .tab.active {
+            border-bottom: 3px solid #3498db;
+            color: #3498db;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .hazard-report-btn {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #e74c3c;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+                padding-bottom: 100px;
+            }
+            
+            .badge {
+                width: 48%;
+            }
+            
+            .hazard-report-btn {
+                bottom: 80px;
+                right: 15px;
+                width: 55px;
+                height: 55px;
+            }
+        }
+    </style>
+    </head>
+    <body>
+        <!-- Floating Hazard Report Button -->
+        <div class="hazard-report-btn" onclick="showPage('report-page')">
+            <i class="fas fa-biohazard"></i>
+        </div>
+
+        <div class="container">
+            <div class="header">
+                <div class="logo">Neer<br>NETRA</div>
+                <div class="user-icon" onclick="showPage('profile-page')">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+
+            <div class="stats-container">
+                <div class="stat-box">
+                    <div class="stat-value">235</div>
+                    <div class="stat-label">Points</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Reports</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">7</div>
+                    <div class="stat-label">Badges</div>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <div class="tab active"
+                    onclick="switchTab('rewards')">Rewards</div>
+                <div class="tab" onclick="switchTab('badges')">Badges</div>
+                <div class="tab"
+                    onclick="switchTab('leaderboard')">Leaderboard</div>
+            </div>
+
+            <!-- Rewards Tab -->
+            <div id="rewards-tab" class="tab-content active">
+                <div class="section-title">
+                    <i class="fas fa-trophy"></i>Your Reward History
+                    <span class="level-badge">Level 3 Explorer</span>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>Level Progress</span>
+                        <span>65%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                </div>
+
+                <div class="reward-item">
+                    <div>
+                        <div class="reward-date">Today</div>
+                        <div class="reward-desc">Oil spill report verified</div>
+                    </div>
+                    <div class="reward-points">+25</div>
+                </div>
+
+                <div class="reward-item">
+                    <div>
+                        <div class="reward-date">23/Sep/23</div>
+                        <div class="reward-desc">Coastal pollution report
+                            verified</div>
+                    </div>
+                    <div class="reward-points">+20</div>
+                </div>
+
+                <div class="reward-item">
+                    <div>
+                        <div class="reward-date">20/Sep/23</div>
+                        <div class="reward-desc">Weekly login bonus</div>
+                    </div>
+                    <div class="reward-points">+10</div>
+                </div>
+
+                <div class="reward-item">
+                    <div>
+                        <div class="reward-date">18/Sep/23</div>
+                        <div class="reward-desc">Illegal fishing report
+                            verified</div>
+                    </div>
+                    <div class="reward-points">+30</div>
+                </div>
+
+                <div class="reward-item">
+                    <div>
+                        <div class="reward-date">15/Sep/23</div>
+                        <div class="reward-desc">Coral bleaching report
+                            verified</div>
+                    </div>
+                    <div class="reward-points">+25</div>
+                </div>
+
+                <div class="reward-item">
+                    <div>
+                        <div class="reward-date">10/Sep/23</div>
+                        <div class="reward-desc">Beach cleanup
+                            participation</div>
+                    </div>
+                    <div class="reward-points">+15</div>
+                </div>
+            </div>
+
+            <!-- Badges Tab -->
+            <div id="badges-tab" class="tab-content">
+                <div class="section-title">
+                    <i class="fas fa-medal"></i>Achievement Badges
+                </div>
+
+                <div class="badges-container">
+                    <div class="badge">
+                        <div class="badge-icon"><i
+                                class="fas fa-star"></i></div>
+                        <div class="badge-title">First Report</div>
+                        <div class="badge-desc">Submit your first report</div>
+                    </div>
+
+                    <div class="badge">
+                        <div class="badge-icon"><i
+                                class="fas fa-check-double"></i></div>
+                        <div class="badge-title">Verified Reporter</div>
+                        <div class="badge-desc">5 reports verified</div>
+                    </div>
+
+                    <div class="badge">
+                        <div class="badge-icon"><i
+                                class="fas fa-shield-alt"></i></div>
+                        <div class="badge-title">Coastal Guardian</div>
+                        <div class="badge-desc">10 reports submitted</div>
+                    </div>
+
+                    <div class="badge">
+                        <div class="badge-icon"><i
+                                class="fas fa-water"></i></div>
+                        <div class="badge-title">Oil Spill Expert</div>
+                        <div class="badge-desc">3 oil spill reports</div>
+                    </div>
+
+                    <div class="badge unearned">
+                        <div class="badge-icon"><i
+                                class="fas fa-users"></i></div>
+                        <div class="badge-title">Community Leader</div>
+                        <div class="badge-desc">Top 10 in leaderboard</div>
+                    </div>
+
+                    <div class="badge unearned">
+                        <div class="badge-icon"><i
+                                class="fas fa-award"></i></div>
+                        <div class="badge-title">Elite Protector</div>
+                        <div class="badge-desc">Reach Level 5</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leaderboard Tab -->
+            <div id="leaderboard-tab" class="tab-content">
+                <div class="section-title">
+                    <i class="fas fa-chart-line"></i>Community Leaderboard
+                </div>
+
+                <div class="leaderboard-container">
+                    <div class="leaderboard-item">
+                        <div class="leaderboard-rank">1</div>
+                        <div class="leaderboard-user">
+                            <div class="leaderboard-avatar"><i
+                                    class="fas fa-user"></i></div>
+                            <div>MarineProtector</div>
+                        </div>
+                        <div class="leaderboard-points">560</div>
+                    </div>
+
+                    <div class="leaderboard-item">
+                        <div class="leaderboard-rank">2</div>
+                        <div class="leaderboard-user">
+                            <div class="leaderboard-avatar"><i
+                                    class="fas fa-user"></i></div>
+                            <div>CoastalGuardian</div>
+                        </div>
+                        <div class="leaderboard-points">485</div>
+                    </div>
+
+                    <div class="leaderboard-item">
+                        <div class="leaderboard-rank">3</div>
+                        <div class="leaderboard-user">
+                            <div class="leaderboard-avatar"><i
+                                    class="fas fa-user"></i></div>
+                            <div>WaveWatcher</div>
+                        </div>
+                        <div class="leaderboard-points">420</div>
+                    </div>
+
+                    <div class="leaderboard-item">
+                        <div class="leaderboard-rank">4</div>
+                        <div class="leaderboard-user">
+                            <div class="leaderboard-avatar"><i
+                                    class="fas fa-user"></i></div>
+                            <div>SeaSavior</div>
+                        </div>
+                        <div class="leaderboard-points">380</div>
+                    </div>
+
+                    <div class="leaderboard-item">
+                        <div class="leaderboard-rank">5</div>
+                        <div class="leaderboard-user">
+                            <div class="leaderboard-avatar"><i
+                                    class="fas fa-user"></i></div>
+                            <div>OceanObserver</div>
+                        </div>
+                        <div class="leaderboard-points">350</div>
+                    </div>
+
+                    <div class="leaderboard-item"
+                        style="background-color: #e8f1f9; border-radius: 8px;">
+                        <div class="leaderboard-rank">15</div>
+                        <div class="leaderboard-user">
+                            <div class="leaderboard-avatar"><i
+                                    class="fas fa-user"></i></div>
+                            <div>You</div>
+                        </div>
+                        <div class="leaderboard-points">235</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-icon" onclick="window.location.href='/'">
+                <i class="fas fa-home"></i>
+            </div>
+            <div class="nav-icon"
+                onclick="window.location.href='/gamification'">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="nav-icon" onclick="window.location.href='/rewards'">
+                <div class="center-icon">
+                    <i class="fas fa-award"></i>
+                </div>
+            </div>
+            <div class="nav-icon" onclick="window.location.href='/history'">
+                <i class="fas fa-history"></i>
+            </div>
+            <div class="nav-icon" onclick="window.location.href='/login'">
+                <i class="fas fa-user"></i>
+            </div>
+        </div>
+        <script>
+        // Function to switch between tabs
+        function switchTab(tabName) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Add active class to clicked tab
+            event.currentTarget.classList.add('active');
+            
+            // Show corresponding tab content
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+        
+        // Function to show a specific page (simplified for this example)
+        function showPage(pageId) {
+            alert('Navigating to ' + pageId + ' page');
+            // In a real app, this would handle page navigation
+        }
+        
+        // Sample data for demonstration
+        const userData = {
+            points: 235,
+            reports: 12,
+            badges: 7,
+            level: 3,
+            progress: 65,
+            rank: 15
+        };
+        
+        // Update stats with user data
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('.stat-value:nth-child(1)').textContent = userData.points;
+            document.querySelector('.stat-value:nth-child(2)').textContent = userData.reports;
+            document.querySelector('.stat-value:nth-child(3)').textContent = userData.badges;
+            document.querySelector('.progress-fill').style.width = userData.progress + '%';
+            document.querySelector('.progress-label span:last-child').textContent = userData.progress + '%';
+        });
+    </script>
+    </body>
+</html>

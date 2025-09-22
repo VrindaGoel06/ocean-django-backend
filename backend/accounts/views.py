@@ -47,6 +47,22 @@ def render_login(request):
     return render(request, "login.html")
 
 
+def render_gamification(request):
+    return render(request, "gamification.html")
+
+
+def render_rewards(request):
+    return render(request, "rewards.html")
+
+
+def render_history(request):
+    return render(request, "history.html")
+
+
+def render_dashboard(request):
+    return render(request, "dashboard.html")
+
+
 def render_signup(request):
     return render(request, "signup.html")
 

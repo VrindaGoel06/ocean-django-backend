@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>NeerNetra - Landing Page</title>
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #f0f8ff;
+  color: #0a3d62;
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.container {
+  padding: 20px;
+  padding-bottom: 80px;
+}
+
+.header {
+  display: flex;
+  justify-content: center; /* center since no user icon */
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 2px solid #0a3d62;
+  margin-bottom: 20px;
+}
+
+.logo {
+  font-size: 28px;
+  font-weight: bold;
+  color: #0a3d62;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.map-container {
+  background-color: #d1e8ff;
+  height: 200px;
+  border-radius: 10px;
+  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid #0a3d62;
+}
+
+.trends-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.trend-item {
+  background-color: #d1e8ff;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid #0a3d62;
+}
+
+.section-title {
+  font-size: 18px;
+  margin: 15px 0;
+  font-weight: bold;
+}
+
+.btn {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  width: 100%;
+  margin: 10px 0;
+  transition: background-color 0.3s;
+}
+
+.btn:hover {
+  background-color: #c0392b;
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #0a3d62;
+  display: flex;
+  justify-content: space-around;
+  padding: 15px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.nav-icon {
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.center-icon {
+  background-color: #3498db;
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: -10px;
+}
+
+@media (max-width: 480px) {
+  body {
+    max-width: 100%;
+  }
+
+  .container {
+    padding: 15px;
+    padding-bottom: 80px;
+  }
+
+  .trends-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+    </head>
+    <body>
+        <!-- Landing Page -->
+        <div class="container">
+            <div class="header">
+                <div class="logo">Neer<br>Netra</div>
+            </div>
+
+            <div class="map-container">
+                Live Map
+            </div>
+
+            <div class="trends-grid">
+                <div class="trend-item">Popular Trends</div>
+                <div class="trend-item">Popular Trends</div>
+                <div class="trend-item">Popular Trends</div>
+                <div class="trend-item">Popular Trends</div>
+            </div>
+
+            <div class="section-title">What is NeerNetra?</div>
+            <p style="margin-bottom: 20px; text-align: center;">
+                "NeerNetra empowers you to monitor and report ocean hazards in real time, helping communities and authorities keep India's coasts safe."
+            </p>
+
+            <button class="btn"
+                onclick="window.location.href='/reporting'">Report</button>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-icon" onclick="window.location.href='/'">
+                <i class="fas fa-home"></i>
+            </div>
+            <div class="nav-icon"
+                onclick="window.location.href='/gamification'">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="nav-icon" onclick="window.location.href='/rewards'">
+                <div class="center-icon">
+                    <i class="fas fa-award"></i>
+                </div>
+            </div>
+            <div class="nav-icon" onclick="window.location.href='/history'">
+                <i class="fas fa-history"></i>
+            </div>
+            <div class="nav-icon" onclick="window.location.href='/login'">
+                <i class="fas fa-user"></i>
+            </div>
+        </div>
+    </body>
+</html>

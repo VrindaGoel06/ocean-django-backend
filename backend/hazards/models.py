@@ -14,7 +14,7 @@ import json
 
 class UserReport(TimeStampedModel):
     user_submit_type = models.IntegerField(
-        "Hazard inputted by the user", choices=hazardSet, null=False
+        "Hazard according to user", choices=hazardSet, null=False
     )
     user_text = models.CharField(null=False, blank=False)
     user_ip = models.GenericIPAddressField(
@@ -28,7 +28,7 @@ class UserReport(TimeStampedModel):
         "Device language of the user's device", null=False, blank=False
     )
     action_status = models.IntegerField(
-        "Status of the action",
+        "Action status",
         choices=actionStatusSet,
         null=False,
         default=actionStatusSet.TO_BE_STARTED,
@@ -52,18 +52,18 @@ class UserReport(TimeStampedModel):
         "Output from the AI models", null=True, default=None
     )
     type = models.IntegerField(
-        "Type of the hazard determined by the system using the input & AI model system",
+        "Hazard according to system",
         choices=hazardSet,
         null=True,
         default=None,
     )
     severity = models.PositiveSmallIntegerField(
-        "Severity between 1-100 based on the AI model system",
+        # desc"Severity between 1-100 based on the AI model system",
         null=True,
         default=None,
     )
     confidence = models.PositiveSmallIntegerField(
-        "Confidence between 1-100 on the system based on the AI model system",
+        # "Confidence between 1-100 on the system based on the AI model system",
         null=True,
         default=None,
     )
