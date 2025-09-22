@@ -333,10 +333,11 @@
     </head>
     <body>
         <!-- Floating Hazard Report Button -->
-        <div class="hazard-report-btn" onclick="showPage('report-page')">
-            <i class="fas fa-biohazard"></i>
-        </div>
-
+        <a href="/reporting">
+            <div class="hazard-report-btn">
+                <i class="fas fa-biohazard"></i>
+            </div>
+        </a>
         <div class="container">
             <div class="header">
                 <div class="logo">Neer<br>NETRA</div>
@@ -599,14 +600,7 @@
             // Show corresponding tab content
             document.getElementById(tabName + '-tab').classList.add('active');
         }
-        
-        // Function to show a specific page (simplified for this example)
-        function showPage(pageId) {
-            alert('Navigating to ' + pageId + ' page');
-            // In a real app, this would handle page navigation
-        }
-        
-        // Sample data for demonstration
+                // Sample data for demonstration
         const userData = {
             points: 235,
             reports: 12,

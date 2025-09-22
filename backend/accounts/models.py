@@ -80,6 +80,9 @@ class User(AbstractUser):
             },
         )
         msg = EmailMessage(
-            "Verify your email", html_content, settings.EMAIL_HOST_USER, [self.email]
+            "[NeerNatra] Verify Your Email",
+            html_content,
+            settings.EMAIL_HOST_USER,
+            [self.email],
         )
         msg.send()
