@@ -6,7 +6,7 @@ from common.models import GeoVideo
 from .models import UserReport
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 import json
-
+from django.shortcuts import render
 from common.sensors import process_and_store_sensors
 
 geovideo_schema = openapi.Schema(
@@ -175,6 +175,14 @@ client_info_schema = openapi.Schema(
         "language": openapi.Schema(type=openapi.TYPE_STRING),
     },
 )
+
+
+def render_report(request):
+    return render(request, "reporting.html")
+
+
+def render_report_submit(request):
+    return render(request, "report_submit.html")
 
 
 class UserReportCreateView(views.APIView):

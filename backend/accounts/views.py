@@ -3,13 +3,27 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from .serializers import RegisterSerializer, LoginSerializer, ProfileSerializer
-from django.http import HttpResponse
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.shortcuts import render
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+
 
 User = get_user_model()
 token_generator = PasswordResetTokenGenerator()
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])  # anyone can hit this endpoint
+def check_auth(request):
+    """
+    Return whether the current user is authenticated.
+    """
+    if request.user.is_authenticated:
+        return Response({"is_authenticated": True, "username": request.user.username})
+    return Response({"is_authenticated": False})
 
 
 def verify_email(request, uidb64, token):
@@ -21,12 +35,20 @@ def verify_email(request, uidb64, token):
 
     if user is not None and token_generator.check_token(user, token):
         if user.is_active:
-            return HttpResponse("User is already verified.")
+            return render(request, "invalid_verification.html")
         user.is_active = True
         user.save()
-        return HttpResponse("Your email has been verified. You can now log in.")
+        return render(request, "email_verified.html")
     else:
-        return HttpResponse("Verification link is invalid or has expired.")
+        return render(request, "invalid_verification.html")
+
+
+def render_login(request):
+    return render(request, "login.html")
+
+
+def render_signup(request):
+    return render(request, "signup.html")
 
 
 class RegisterView(generics.CreateAPIView):

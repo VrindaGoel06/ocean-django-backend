@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>NeerNetra - Sign Up</title>
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+background-color: #f0f8ff;
+color: #0a3d62;
+max-width: 480px;
+margin: 0 auto;
+min-height: 100vh;
+position: relative;
+box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.container {
+padding: 20px;
+padding-bottom: 20px;
+}
+
+.header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 15px 0;
+border-bottom: 2px solid #0a3d62;
+margin-bottom: 20px;
+}
+
+.logo {
+font-size: 28px;
+font-weight: bold;
+color: #0a3d62;
+}
+
+.back-arrow {
+font-size: 24px;
+cursor: pointer;
+margin-right: 10px;
+}
+
+.input-group {
+  margin-bottom: 25px;
+  position: relative;
+}
+.input-group input {
+width: 100%;
+padding: 14px;
+border: 1px solid #0a3d62;
+border-radius: 8px;
+background-color: #f9f9f9;
+font-size: 16px;
+}
+
+.input-group input:focus {
+outline: none;
+border-color: #3498db;
+box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+}
+
+.input-group input::placeholder {
+color: #7f8c8d;
+}
+
+.btn {
+background-color: #3498db;
+color: white;
+border: none;
+padding: 14px 20px;
+border-radius: 8px;
+cursor: pointer;
+font-size: 16px;
+width: 100%;
+margin: 20px 0 10px;
+transition: background-color 0.3s;
+}
+
+.btn:hover {
+background-color: #2980b9;
+}
+
+.login-link {
+text-align: center;
+margin-top: 20px;
+}
+
+.login-link a {
+color: #0a3d62;
+text-decoration: none;
+font-weight: bold;
+}
+
+.login-link a:hover {
+text-decoration: underline;
+}
+
+.password-toggle {
+position: relative;
+}
+
+
+@media (max-width: 480px) {
+body {
+max-width: 100%;
+}
+
+.container {
+padding: 15px;
+padding-bottom: 20px;
+}
+}
+.error-msg {
+  color: red;
+  font-size: 12px;
+  position: absolute;
+  right: 10px;
+  bottom: -16px;   /* place it below the input */
+  white-space: nowrap;
+}
+
+.toggle-icon {
+position: absolute;
+right: 10px;
+top: 50%;
+transform: translateY(-50%);
+cursor: pointer;
+color: #7f8c8d;
+}
+
+.btn:disabled {
+background-color: #ccc;
+cursor: not-allowed;
+}
+</style>
+    </head>
+    <body>
+        <!-- Signup Page -->
+        <div class="container">
+            <div class="header">
+                <div class="back-arrow">
+                    <i class="fas fa-arrow-left"></i>
+                </div>
+                <div class="logo">Sign Up</div>
+                <div style="width: 24px;"></div> <!-- Empty div for spacing -->
+            </div>
+
+            <div class="input-group">
+                <input type="text" placeholder="Enter Your Username">
+            </div>
+
+            <div class="input-group">
+                <input type="text" placeholder="Enter Your Name">
+            </div>
+
+            <div class="input-group">
+                <input type="text" placeholder="Enter Your Last Name">
+            </div>
+
+            <div class="input-group">
+                <input type="text" placeholder="Enter Your Pincode">
+            </div>
+
+            <div class="input-group">
+                <input type="email" placeholder="Enter Your E-mail">
+            </div>
+
+            <div class="input-group">
+                <input type="tel" placeholder="+XX XXXXXXXXXX">
+            </div>
+
+            <div class="input-group password-toggle">
+                <input type="password" placeholder="Enter Your Password"
+                    id="password">
+                <span class="toggle-icon" id="togglePassword">
+                    <i class="fas fa-eye"></i>
+                </span>
+            </div>
+
+            <div class="input-group password-toggle">
+                <input type="password" placeholder="Enter Your Confirm Password"
+                    id="confirmPassword">
+                <span class="toggle-icon" id="toggleConfirmPassword">
+                    <i class="fas fa-eye"></i>
+                </span>
+            </div>
+
+            <button class="btn">SUBMIT</button>
+
+            <div class="login-link">
+                <p>Already have an account? <a href="#">Login</a></p>
+            </div>
+        </div>
+
+        <script>
+const fields = {
+  username: document.querySelector('input[placeholder="Enter Your Username"]'),
+  first_name: document.querySelector('input[placeholder="Enter Your Name"]'),
+  last_name: document.querySelector('input[placeholder="Enter Your Last Name"]'),
+  pincode: document.querySelector('input[placeholder="Enter Your Pincode"]'),
+  email: document.querySelector('input[placeholder="Enter Your E-mail"]'),
+  phone_number: document.querySelector('input[placeholder="+XX XXXXXXXXXX"]'),
+  password: document.getElementById('password'),
+  confirmPassword: document.getElementById('confirmPassword')
+};
+
+
+const submitBtn = document.querySelector('.btn');
+
+// Utility: add error span if missing
+function getErrorSpan(input) {
+  let span = input.parentElement.querySelector('.error-msg');
+  if (!span) {
+    span = document.createElement('span');
+    span.classList.add('error-msg');
+    input.parentElement.appendChild(span);
+  }
+  return span;
+}
+function setupToggle(toggleId, inputId) {
+  document.getElementById(toggleId).addEventListener('click', function() {
+    const input = document.getElementById(inputId);
+    const icon = this.querySelector('i');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.classList.remove('fa-eye');
+      icon.classList.add('fa-eye-slash');
+    } else {
+      input.type = 'password';
+      icon.classList.remove('fa-eye-slash');
+      icon.classList.add('fa-eye');
+    }
+  });
+}
+
+setupToggle('togglePassword', 'password');
+setupToggle('toggleConfirmPassword', 'confirmPassword');
+// Validation rules
+function validateForm() {
+  let valid = true;
+
+  // Clear errors first
+  document.querySelectorAll('.error-msg').forEach(e => e.textContent = '');
+
+  // Pincode → digits only
+  if (!/^\d+$/.test(fields.pincode.value.trim())) {
+    getErrorSpan(fields.pincode).textContent = "Digits only";
+    valid = false;
+  }
+
+  // Phone → +, space, digits only
+  if (!/^[+]?[0-9 ]+$/.test(fields.phone_number.value.trim())) {
+    getErrorSpan(fields.phone_number).textContent = "Invalid phone";
+    valid = false;
+  }
+
+  // Password match
+  if (fields.password.value !== fields.confirmPassword.value) {
+    getErrorSpan(fields.confirmPassword).textContent = "Passwords do not match";
+    valid = false;
+  }
+
+  // Required fields
+  for (const key in fields) {
+    if (!fields[key].value.trim()) {
+      getErrorSpan(fields[key]).textContent = "Required";
+      valid = false;
+    }
+  }
+
+  // Disable/enable button
+  submitBtn.disabled = !valid;
+  return valid;
+}
+
+// Attach live validation
+Object.values(fields).forEach(input => {
+  input.addEventListener('input', validateForm);
+});
+
+async function submitForm() {
+  if (!validateForm()) return;
+
+  const payload = {
+    first_name: fields.first_name.value.trim(),
+    last_name: fields.last_name.value.trim(),
+    username: fields.username.value.trim(),
+    email: fields.email.value.trim(),
+    password: fields.password.value.trim(),
+    phone_number: fields.phone_number.value.trim(),
+    pincode: parseInt(fields.pincode.value.trim(), 10)
+  };
+
+  try {
+    submitBtn.disabled = true;
+    const response = await fetch('/api/register/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    submitBtn.disabled = false;
+    if (response.ok) {
+    //   alert("Account created! Redirecting...");
+      window.location.href = "/login";
+    } 
+    else if (response.status === 400) {
+      const errors = await response.json();
+      // Clear old messages
+      document.querySelectorAll('.error-msg').forEach(e => e.textContent = '');
+
+      // Show each field error from backend
+      for (const field in errors) {
+        if (fields[field]) {
+            getErrorSpan(fields[field]).textContent = errors[field][0];
+        } else {
+          alert(errors[field][0]); // fallback if field not mapped
+        }
+      }
+
+
+    } 
+    else {
+      const err = await response.json();
+      alert("Error: " + (err.detail || "Registration failed"));
+    }
+  } catch (e) {
+    alert("Network error: " + e.message);
+  }
+}
+
+// Hook up submit button
+submitBtn.addEventListener('click', submitForm);
+</script>
+
+    </body>
+</html>

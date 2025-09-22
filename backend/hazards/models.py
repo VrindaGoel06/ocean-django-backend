@@ -92,15 +92,12 @@ class UserReport(TimeStampedModel):
                     max_tokens=500,
                 )
                 data = completion.choices[0].message.content
-                print(data)
                 if data is None:
                     continue
                 data = data.replace("`", "").replace("json", "").replace("\n", "")
-                print(data)
                 processed_data.append(json.loads(data))
             except:
                 continue
-        print(processed_data)
         self.proccessed_data = processed_data
         types = []
         severities = []

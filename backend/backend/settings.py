@@ -43,7 +43,7 @@ if DEBUG:
 else:
     ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
 
-CSRF_COOKIE_SECURE = HTTPS_ENFORCED
+# CSRF_COOKIE_SECURE = HTTPS_ENFORCED
 SESSION_COOKIE_SECURE = HTTPS_ENFORCED
 if HTTPS_ENFORCED:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -74,7 +74,7 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
+    # "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -162,3 +162,9 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "common.authentication.CsrfExemptSessionAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
+    ]
+}

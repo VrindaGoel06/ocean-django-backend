@@ -1,7 +1,8 @@
 # common/urls.py
 from django.urls import path
-from .views import UserReportCreateView
+from . import views
 
 urlpatterns = [
-    path("user-reports/", UserReportCreateView.as_view(), name="user-report-create"),
+    path("reporting", views.render_report, name="report"),
+    path("report_submit", views.render_report_submit, name="report_submit"),
 ]

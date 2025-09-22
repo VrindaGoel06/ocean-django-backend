@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeerNetra - Login</title>
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #f0f8ff;
+  color: #0a3d62;
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.container {
+  padding: 20px;
+  padding-bottom: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 2px solid #0a3d62;
+  margin-bottom: 20px;
+}
+
+.logo {
+  font-size: 28px;
+  font-weight: bold;
+  color: #0a3d62;
+}
+
+.back-arrow {
+  font-size: 24px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.input-group {
+  margin-bottom: 25px;
+  position: relative;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #0a3d62;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #0a3d62;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  font-size: 16px;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+}
+
+.error-msg {
+  color: red;
+  font-size: 12px;
+  position: absolute;
+  bottom: -16px;
+  left: 0;
+}
+
+.btn {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 14px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  width: 100%;
+  margin: 10px 0;
+  transition: background-color 0.3s;
+}
+
+.btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.btn:hover {
+  background-color: #2980b9;
+}
+
+.forgot-password {
+  text-align: right;
+  margin: 10px 0;
+}
+
+.forgot-password a {
+  color: #0a3d62;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.forgot-password a:hover {
+  text-decoration: underline;
+}
+
+.signup-link {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.signup-link a {
+  color: #0a3d62;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.signup-link a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  body {
+    max-width: 100%;
+  }
+
+  .container {
+    padding: 15px;
+    padding-bottom: 20px;
+  }
+}
+</style>
+  </head>
+  <body>
+    <!-- Login Page -->
+    <div class="container">
+      <div class="header">
+        <div class="back-arrow">
+          <i class="fas fa-arrow-left"></i>
+        </div>
+        <div class="logo">Login</div>
+        <div style="width: 24px;"></div> <!-- Empty div for spacing -->
+      </div>
+
+      <div class="input-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="Enter Your Email">
+      </div>
+
+      <div class="input-group">
+        <label for="password">Password</label>
+        <input type="password" id="password"
+          placeholder="Enter Your Password">
+      </div>
+
+      <div class="forgot-password">
+        <a href="#">Forgot Password?</a>
+      </div>
+
+      <button class="btn">LOGIN</button>
+
+      <div class="signup-link">
+        <p>New here? <a href="#">Create an account</a></p>
+      </div>
+    </div>
+
+    <script>
+// Map fields
+const fields = {
+  email: document.getElementById('email'),
+  password: document.getElementById('password')
+};
+const submitBtn = document.querySelector('.btn');
+
+// Helper: attach or find error span
+function getErrorSpan(input) {
+  let span = input.parentElement.querySelector('.error-msg');
+  if (!span) {
+    span = document.createElement('span');
+    span.classList.add('error-msg');
+    input.parentElement.appendChild(span);
+  }
+  return span;
+}
+
+// Validate frontend
+function validateForm() {
+  let valid = true;
+  document.querySelectorAll('.error-msg').forEach(e => e.textContent = '');
+
+  if (!fields.email.value.trim()) {
+    getErrorSpan(fields.email).textContent = "Required";
+    valid = false;
+  } else if (!validateEmail(fields.email.value.trim())) {
+    getErrorSpan(fields.email).textContent = "Invalid email";
+    valid = false;
+  }
+
+  if (!fields.password.value.trim()) {
+    getErrorSpan(fields.password).textContent = "Required";
+    valid = false;
+  }
+
+  submitBtn.disabled = !valid;
+  return valid;
+}
+
+// Submit handler
+submitBtn.addEventListener('click', async function() {
+  if (!validateForm()) return;
+
+  const payload = {
+    email: fields.email.value.trim(),
+    password: fields.password.value.trim()
+  };
+
+  try {
+    submitBtn.disabled = true;
+    const response = await fetch('/api/login/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    submitBtn.disabled = false;
+    if (response.ok) {
+      window.location.href = "/";
+    } else if (response.status === 400) {
+      const errors = await response.json();
+
+      // Clear old errors
+      document.querySelectorAll('.error-msg').forEach(e => e.textContent = '');
+
+      // Attach new errors
+      for (const field in errors) {
+        if (field in fields) {
+          getErrorSpan(fields[field]).textContent = errors[field][0];
+        } else if (field === "non_field_errors") {
+          getErrorSpan(fields.password).textContent = errors[field][0]; // show under password
+        }
+      }
+
+    } else {
+      alert("Login failed");
+    }
+  } catch (err) {
+    alert("Network error: " + err.message);
+  }
+});
+
+function validateEmail(email) {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email);
+}
+Object.values(fields).forEach(input => {
+  input.addEventListener('input', validateForm);
+});
+
+// Run validation once on load
+validateForm();
+</script>
+  </body>
+</html>
