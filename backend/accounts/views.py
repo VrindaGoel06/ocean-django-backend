@@ -90,8 +90,8 @@ class LoginView(generics.GenericAPIView):
         password = request.data.get("password")
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        print(email, password)
         user = authenticate(request, username=email, password=password)
+        print(user)
         if user is not None:
             login(request, user)  # creates session cookie
             return Response({"message": "Login successful"})

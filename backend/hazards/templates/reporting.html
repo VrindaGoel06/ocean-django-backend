@@ -173,7 +173,7 @@
         </div>
       </div>
 
-      <!-- Location Required Popup (ADDED) -->
+      <!-- Location Required Popup -->
       <div id="locationPopup" class="popup">
         <div class="popup-content">
           <h3>Location Required</h3>
@@ -188,6 +188,23 @@
             <button id="locationCancel" class="btn"
               style="background:#7f8c8d;">Cancel</button>
             <button id="locationAllow" class="btn">Allow</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Camera Required Popup (NEW) -->
+      <div id="cameraPopup" class="popup">
+        <div class="popup-content">
+          <h3>Camera Required</h3>
+          <p style="margin:10px 0;">
+            This report requires camera access.<br>
+            Please allow camera permission.<br><br>
+            If you have previously denied, go to your browser or device
+            settings and enable Camera access for this site.
+          </p>
+          <div
+            style="margin-top:15px; display:flex; gap:10px; justify-content:flex-end;">
+            <button id="cameraRetry" class="btn">Retry</button>
           </div>
         </div>
       </div>
@@ -222,7 +239,7 @@
         if (e.target === document.getElementById("popup")) closePopup();
       };
 
-      // Location popup function (ADDED)
+      // Location popup function
       function getLocationWithPopup() {
         return new Promise((resolve) => {
           const popup = document.getElementById("locationPopup");
@@ -247,10 +264,8 @@
                 ts: new Date(pos.timestamp).toISOString()
               }),
               err => {
-                showPopup("Error",
-                  "Location access failed: " + err.message +
-                  "\n\nPlease check your browser or device settings to allow Location for this site."
-                );
+                // keep asking until allowed
+                popup.style.display = "block";
                 resolve(null);
               },
               { enableHighAccuracy: true, timeout: 5000 }
@@ -258,10 +273,37 @@
           };
 
           document.getElementById("locationCancel").onclick = () => {
-            popup.style.display = "none";
-            showPopup("Error", "Cannot continue without location.");
+            popup.style.display = "block"; // reopen, can't continue
             resolve(null);
           };
+        });
+      }
+
+      // Camera popup function
+      async function getCameraWithPopup() {
+        const popup = document.getElementById("cameraPopup");
+        popup.style.display = "block";
+
+        return new Promise((resolve) => {
+          async function tryCamera() {
+            try {
+              let stream;
+              try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                  video: { facingMode: { exact: "environment" } },
+                  audio: true
+                });
+              } catch (err) {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+              }
+              popup.style.display = "none";
+              resolve(stream);
+            } catch (err) {
+              popup.style.display = "block"; // keep showing until allowed
+            }
+          }
+          document.getElementById("cameraRetry").onclick = tryCamera;
+          tryCamera();
         });
       }
 
@@ -287,7 +329,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const isLoggedIn = await checkLogin();
   if (!isLoggedIn) {
     showLoginPopup(() => {
-      // Allow guest reporting after closing popup
       console.log("Continuing as guest...");
     });
   }
@@ -299,10 +340,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const preview=document.getElementById("preview");
 
   function log(...a){ logEl.textContent+="\n"+a.join(" "); console.log(...a); }
-  function warn(msg) {
-    log("⚠️ " + msg);
-    console.warn("⚠️ " + msg);
-  }
+  function warn(msg) { log("⚠️ " + msg); console.warn("⚠️ " + msg); }
 
   let accelData=[],gyroData=[],oriData=[],magData=[],baroData=[],startTime=null;
   function relT(){ return (performance.now()-startTime)/1000; }
@@ -360,34 +398,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     startBtn.disabled=true;
     logEl.textContent=""; log("Starting record...");
 
-    // 📍 NEW: request location first
-    const geo = await getLocationWithPopup();
-    if (!geo) {
-      log("❌ Aborted: Location not available");
+    // 📝 Require Hazard Description
+    const desc = document.getElementById("user_text").value.trim();
+    if (!desc) {
+      showPopup("Error", "Hazard Description is required.");
       startBtn.disabled=false;
       return;
     }
 
-    if (DeviceMotionEvent?.requestPermission) { try { await DeviceMotionEvent.requestPermission(); } catch{} }
-    if (DeviceOrientationEvent?.requestPermission) { try { await DeviceOrientationEvent.requestPermission(); } catch{} }
-
-    accelData=[]; gyroData=[]; oriData=[]; magData=[]; baroData=[];
-    window.addEventListener("devicemotion",handleMotion,true);
-    window.addEventListener("deviceorientation",handleOrientation,true);
-    startMag(); startBaro();
-
-    let stream;
-    try {
-      // 📷 Try to use the back camera first
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { exact: "environment" } },
-        audio: true
-      });
-    } catch (err) {
-      console.warn("Back camera not available, using default", err);
-      // fallback to whatever camera is available
-      stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    // 📍 Require location
+    let geo=null;
+    while (!geo) {
+      geo = await getLocationWithPopup();
     }
+
+    // 📷 Require camera
+    let stream=null;
+    while (!stream) {
+      stream = await getCameraWithPopup();
+    }
+
     preview.srcObject=stream;
     const rec=new MediaRecorder(stream,{mimeType:"video/webm;codecs=vp8,opus"});
     const chunks=[];
@@ -440,7 +470,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 
     const fd=new FormData();
-    fd.append("user_text",document.getElementById("user_text").value);
+    fd.append("user_text",desc);
     fd.append("user_submit_type",document.querySelector("input[name=user_submit_type]:checked").value);
     fd.append("user_video",file);
     fd.append("geovideo",JSON.stringify(geovideo));
