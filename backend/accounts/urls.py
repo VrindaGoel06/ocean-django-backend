@@ -8,4 +8,5 @@ urlpatterns = [
     path("gamification", views.render_gamification, name="gamification"),
     path("rewards", views.render_rewards, name="rewards"),
     path("history", views.render_history, name="history"),
+    path("test", views.render_test, name="test"),
 ]

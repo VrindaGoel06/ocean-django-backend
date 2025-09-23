@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Report Map</title>
+    <link rel="stylesheet"
+      href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+    html, body { height: 100%; margin: 0; }
+    #map { height: 100%; width: 100%; }
+  </style>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+    // --- Enum label maps ---
+    const hazardLabels = {
+      0:"Unknown",1:"Tide",2:"Coastal Damage",3:"Flooding",4:"Waves",
+      5:"Swell",6:"Surge",7:"Storm",8:"Tsunami",9:"Other"
+    };
+    const actionStatusLabels = {
+      0:"To Be Started",1:"In Progress",2:"Next Stage",3:"Finish"
+    };
+    const verificationLabels = {
+      "-2":"Discarded","-1":"Not Severe",0:"Not System Processed",
+      1:"Not Acknowledged",2:"In Progress",3:"Personnel Unconfirmed",4:"Verified"
+    };
+
+    // --- Init map ---
+    const map = L.map("map").setView([20, 0], 2);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap contributors"
+    }).addTo(map);
+
+    // --- SVG triangle builder ---
+    function triangleSVG({ severity, confidence, size = 30, strokeWidth = 1 }) {
+      const sev = Math.max(0, Math.min(100, Number(severity) || 0));
+      const conf = Math.max(0, Math.min(100, Number(confidence) || 0));
+
+      // Severity → yellow (255,255,0) to red (255,0,0)
+      const ratio = sev / 100;
+      const gFill = Math.round(255 * (1 - ratio));
+      const fill = `rgb(255, ${gFill}, 0)`;
+
+      // Confidence → opacity (0.2–1.0)
+      const fillOpacity = 0.2 + (conf / 100) * 0.8;
+
+      // Geometry
+      const half = size / 2;
+      const height = size * Math.sqrt(3) / 2;
+
+      return {
+        svg: `
+          <svg width="${size}" height="${height}" viewBox="0 0 ${size} ${height}" xmlns="http://www.w3.org/2000/svg">
+            <polygon 
+              points="${half},0 ${size},${height} 0,${height}"
+              fill="${fill}"
+              fill-opacity="${fillOpacity}"
+              stroke="rgba(0,0,0,0.3)"
+              stroke-width="${strokeWidth}"
+              stroke-linejoin="round"
+            />
+          </svg>
+        `.trim(),
+        size: [size, height],
+        anchor: [half, height / 2]
+      };
+    }
+
+    // --- Load API GeoJSON ---
+    fetch("/api/geovideos/")  // adjust endpoint if needed
+      .then(r => r.json())
+      .then(data => {
+        const layer = L.geoJSON(data, {
+          pointToLayer: (feature, latlng) => {
+            const p = feature.properties;
+            const markerSpec = triangleSVG({ severity: p.severity, confidence: p.confidence });
+
+            const marker = L.marker(latlng, {
+              icon: L.divIcon({
+                className: "triangle-marker",
+                html: markerSpec.svg,
+                iconSize: markerSpec.size,
+                iconAnchor: markerSpec.anchor
+              })
+            });
+
+            marker.bindPopup(() => {
+              const created = p.created_at ? new Date(p.created_at).toLocaleString() : "N/A";
+              return `
+                <b>Hazard Report</b><br/>
+                <b>Severity:</b> ${p.severity ?? "N/A"}<br/>
+                <b>Confidence:</b> ${p.confidence ?? "N/A"}<br/>
+                <b>Created:</b> ${created}<br/>
+                <b>Desc:</b> ${p.desc || "N/A"}<br/>
+                <b>Type:</b> ${hazardLabels[p.type] ?? p.type}<br/>
+                <b>Verification:</b> ${verificationLabels[p.verification] ?? p.verification}<br/>
+                <b>Action Status:</b> ${actionStatusLabels[p.action_status] ?? p.action_status}<br/>
+              `;
+            });
+
+            return marker;
+          }
+        }).addTo(map);
+
+        // Centering: device location or latest report
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            pos => map.setView([pos.coords.latitude, pos.coords.longitude], 10),
+            () => focusOnLatest(layer),
+            { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+          );
+        } else {
+          focusOnLatest(layer);
+        }
+
+        function focusOnLatest(geoLayer) {
+          let latest = null;
+          geoLayer.eachLayer(l => {
+            const dt = new Date(l.feature.properties.created_at || 0);
+            if (!latest || dt > new Date(latest.feature.properties.created_at || 0)) {
+              latest = l;
+            }
+          });
+          if (latest) {
+            map.setView(latest.getLatLng(), 8);
+            latest.openPopup();
+          } else {
+            map.setView([20, 0], 2);
+          }
+        }
+      })
+      .catch(err => console.error("Failed to load GeoJSON:", err));
+  </script>
+  </body>
+</html>

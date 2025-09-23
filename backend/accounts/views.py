@@ -63,6 +63,10 @@ def render_dashboard(request):
     return render(request, "dashboard.html")
 
 
+def render_test(request):
+    return render(request, "test.html")
+
+
 def render_signup(request):
     return render(request, "signup.html")
 

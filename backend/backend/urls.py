@@ -39,7 +39,8 @@ urlpatterns = [
     path("", include("accounts.urls")),
     path("api/", include("hazards.drf_urls")),
     path("", include("hazards.urls")),
-    # API Docs
+    path("api/", include("maps.drf_urls")),
+    path("", include("maps.urls")),  # API Docs
     re_path(
         r"^swagger(?P<format>\.json|\.yaml)$",
         schema_view.without_ui(cache_timeout=0),

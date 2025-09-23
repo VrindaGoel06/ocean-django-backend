@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "hazards",
     "common",
     "leaflet",
+    "maps",
 ]
 
 AUTH_USER_MODEL = "accounts.User"

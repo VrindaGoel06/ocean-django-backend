@@ -103,7 +103,6 @@
     font-size: 14px;
     color: #333;
 }
-
   </style>
   </head>
   <body>
@@ -173,6 +172,26 @@
           </div>
         </div>
       </div>
+
+      <!-- Location Required Popup (ADDED) -->
+      <div id="locationPopup" class="popup">
+        <div class="popup-content">
+          <h3>Location Required</h3>
+          <p style="margin:10px 0;">
+            This report requires your location.<br>
+            Please allow GPS access.<br><br>
+            If you have previously denied, go to your browser or device
+            settings and enable Location access for this site.
+          </p>
+          <div
+            style="margin-top:15px; display:flex; gap:10px; justify-content:flex-end;">
+            <button id="locationCancel" class="btn"
+              style="background:#7f8c8d;">Cancel</button>
+            <button id="locationAllow" class="btn">Allow</button>
+          </div>
+        </div>
+      </div>
+
       <pre id="log">Idle</pre>
     </div>
 
@@ -202,6 +221,50 @@
       window.onclick = function(e) {
         if (e.target === document.getElementById("popup")) closePopup();
       };
+
+      // Location popup function (ADDED)
+      function getLocationWithPopup() {
+        return new Promise((resolve) => {
+          const popup = document.getElementById("locationPopup");
+          popup.style.display = "block";
+
+          document.getElementById("locationAllow").onclick = () => {
+            popup.style.display = "none";
+
+            if (!navigator.geolocation) {
+              showPopup("Error", "Geolocation not supported by this browser.");
+              return resolve(null);
+            }
+
+            navigator.geolocation.getCurrentPosition(
+              pos => resolve({
+                lat: pos.coords.latitude,
+                lon: pos.coords.longitude,
+                alt: pos.coords.altitude,
+                acc: pos.coords.accuracy,
+                speed: pos.coords.speed,
+                heading: pos.coords.heading,
+                ts: new Date(pos.timestamp).toISOString()
+              }),
+              err => {
+                showPopup("Error",
+                  "Location access failed: " + err.message +
+                  "\n\nPlease check your browser or device settings to allow Location for this site."
+                );
+                resolve(null);
+              },
+              { enableHighAccuracy: true, timeout: 5000 }
+            );
+          };
+
+          document.getElementById("locationCancel").onclick = () => {
+            popup.style.display = "none";
+            showPopup("Error", "Cannot continue without location.");
+            resolve(null);
+          };
+        });
+      }
+
 function showLoginPopup(onGuestContinue) {
   const popup = document.getElementById("loginPopup");
   popup.style.display = "block";
@@ -237,8 +300,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function log(...a){ logEl.textContent+="\n"+a.join(" "); console.log(...a); }
   function warn(msg) {
-    log("⚠️ " + msg);   // goes into <pre id="log">
-    console.warn("⚠️ " + msg);  // also in console
+    log("⚠️ " + msg);
+    console.warn("⚠️ " + msg);
   }
 
   let accelData=[],gyroData=[],oriData=[],magData=[],baroData=[],startTime=null;
@@ -263,9 +326,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       if("Magnetometer" in window){
         magnetometer=new Magnetometer({frequency:60});
-        magnetometer.addEventListener("reading",()=>{
-          magData.push([magnetometer.x||0,magnetometer.y||0,magnetometer.z||0,relT()]);
-        });
+        magnetometer.addEventListener("reading",()=>{ magData.push([magnetometer.x||0,magnetometer.y||0,magnetometer.z||0,relT()]); });
         magnetometer.start();
       } else {
         warn("Magnetometer not supported by this device/browser");
@@ -276,30 +337,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       if("Barometer" in window){
         barometer=new Barometer({frequency:1});
-        barometer.addEventListener("reading",()=>{
-          baroData.push([barometer.pressure||0,relT()]);
-        });
+        barometer.addEventListener("reading",()=>{ baroData.push([barometer.pressure||0,relT()]); });
         barometer.start();
       } else {
         warn("Barometer not supported by this device/browser");
       }
     } catch(e) { warn("Barometer init failed: " + e.message); }
-  }
-
-  async function getLocation(){
-    return new Promise(res=>{
-      if(!navigator.geolocation) return res(null);
-      navigator.geolocation.getCurrentPosition(
-        pos=>res({
-          lat:pos.coords.latitude, lon:pos.coords.longitude,
-          alt:pos.coords.altitude, acc:pos.coords.accuracy,
-          speed:pos.coords.speed, heading:pos.coords.heading,
-          ts:new Date(pos.timestamp).toISOString()
-        }),
-        err=>{ console.warn("Geo fail",err); res(null); },
-        {enableHighAccuracy:true,timeout:5000}
-      );
-    });
   }
 
   function downsample(series, targetHz=10){
@@ -317,6 +360,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     startBtn.disabled=true;
     logEl.textContent=""; log("Starting record...");
 
+    // 📍 NEW: request location first
+    const geo = await getLocationWithPopup();
+    if (!geo) {
+      log("❌ Aborted: Location not available");
+      startBtn.disabled=false;
+      return;
+    }
+
     if (DeviceMotionEvent?.requestPermission) { try { await DeviceMotionEvent.requestPermission(); } catch{} }
     if (DeviceOrientationEvent?.requestPermission) { try { await DeviceOrientationEvent.requestPermission(); } catch{} }
 
@@ -325,7 +376,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.addEventListener("deviceorientation",handleOrientation,true);
     startMag(); startBaro();
 
-    const stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+    let stream;
+    try {
+      // 📷 Try to use the back camera first
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { exact: "environment" } },
+        audio: true
+      });
+    } catch (err) {
+      console.warn("Back camera not available, using default", err);
+      // fallback to whatever camera is available
+      stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    }
     preview.srcObject=stream;
     const rec=new MediaRecorder(stream,{mimeType:"video/webm;codecs=vp8,opus"});
     const chunks=[];
@@ -341,54 +403,40 @@ document.addEventListener("DOMContentLoaded", async () => {
     const file=new File([blob],"hazard.webm",{type:"video/webm"});
     stream.getTracks().forEach(t=>t.stop());
 
-    const geo=await getLocation();
     const client_info={ userAgent:navigator.userAgent, platform:navigator.platform, language:navigator.language };
     const track=stream.getVideoTracks()[0];
     const settings=track.getSettings();
-  if (!settings.frameRate) warn("Frame rate not available");
-  if (!preview.videoWidth || !preview.videoHeight) warn("Resolution not available");
+    if (!settings.frameRate) warn("Frame rate not available");
+    if (!preview.videoWidth || !preview.videoHeight) warn("Resolution not available");
 
-  // Orientation snapshot
-  if (!oriData.length) warn("No orientation data captured");
-
-  // Geolocation extra checks
-  if (!geo) {
-    warn("Geolocation not available");
-  } else {
-    if (geo.speed === undefined || geo.speed === null) warn("Speed not available");
-    if (geo.heading === undefined || geo.heading === null) warn("Direction not available");
-  }
-
+    if (!oriData.length) warn("No orientation data captured");
 
     const lastOri=oriData.length?oriData.at(-1):[null,null,null];
     const geovideo = {
-    device_model: "",
-    software_info: "",
-    location: geo ? `POINT(${geo.lon} ${geo.lat})` : null,
-    altitude: geo ? geo.alt : null,
-    gps_accuracy: geo ? geo.acc : null,
-    speed: geo ? geo.speed : null,
-    direction: geo ? geo.heading : null,
-    gps_fix_type: null,
-    num_satellites: null,
-    timestamp_utc: geo ? geo.ts : new Date().toISOString(),
-
-    orientation_roll: lastOri[0],
-    orientation_pitch: lastOri[1],
-    orientation_yaw: lastOri[2],
-
-    resolution: (preview.videoWidth && preview.videoHeight) ? `${preview.videoWidth}x${preview.videoHeight}` : null,
-    frame_rate: settings.frameRate ?? null,
-    aperture: null,
-    iso: null,
-    lens: null,
-    accelerometer: downsample(accelData, 10),
-    gyroscope: downsample(gyroData, 10),
-    magnetometer: downsample(magData, 10),
-    barometer: downsample(baroData, 1),
-    orientation_series: downsample(oriData, 10),
-
-    duration_sec: 10
+      device_model: "",
+      software_info: "",
+      location: geo ? `POINT(${geo.lon} ${geo.lat})` : null,
+      altitude: geo ? geo.alt : null,
+      gps_accuracy: geo ? geo.acc : null,
+      speed: geo ? geo.speed : null,
+      direction: geo ? geo.heading : null,
+      gps_fix_type: null,
+      num_satellites: null,
+      timestamp_utc: geo ? geo.ts : new Date().toISOString(),
+      orientation_roll: lastOri[0],
+      orientation_pitch: lastOri[1],
+      orientation_yaw: lastOri[2],
+      resolution: (preview.videoWidth && preview.videoHeight) ? `${preview.videoWidth}x${preview.videoHeight}` : null,
+      frame_rate: settings.frameRate ?? null,
+      aperture: null,
+      iso: null,
+      lens: null,
+      accelerometer: downsample(accelData, 10),
+      gyroscope: downsample(gyroData, 10),
+      magnetometer: downsample(magData, 10),
+      barometer: downsample(baroData, 1),
+      orientation_series: downsample(oriData, 10),
+      duration_sec: 10
     };
 
     const fd=new FormData();
@@ -398,35 +446,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     fd.append("geovideo",JSON.stringify(geovideo));
     fd.append("client_info",JSON.stringify(client_info));
 
-// Send to API
-log("Sending report...");
-  try {
-    const resp = await fetch("/api/user-reports/", {
-      method: "POST",
-      body: fd
-    });
+    log("Sending report...");
+    try {
+      const resp = await fetch("/api/user-reports/", { method: "POST", body: fd });
+      const text = await resp.text();
+      log("Response:", resp.status, text);
 
-    const text = await resp.text();
-    log("Response:", resp.status, text);
-
-    if (resp.ok) {
-      // ✅ Success
-      window.location.href = "/report_submit";
-    } else {
-      // Other codes (500, etc.)
-      showPopup("Unexpected response: " + resp.status + "\n" + text);
+      if (resp.ok) {
+        window.location.href = "/report_submit";
+      } else {
+        showPopup("Unexpected response: " + resp.status, text);
+      }
+    } catch (e) {
+      log("Upload error:", e);
+      showPopup("Network error", e.message);
     }
-  } catch (e) {
-    log("Upload error:", e);
-    showPopup("Network error: " + e.message);
-    }
-
     startBtn.disabled=false;
   }
 
   startBtn.onclick=()=>recordAndSend();
 })();
-
 </script>
   </body>
 </html>
