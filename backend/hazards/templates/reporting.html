@@ -118,6 +118,9 @@
           <label for="user_text">Hazard Description</label>
           <input type="text" id="user_text"
             placeholder="Describe the hazard...">
+          <small id="descRequired"
+            style="color:red; font-size:12px; display:none;">REQUIRED</small>
+
         </div>
 
         <fieldset>
@@ -338,6 +341,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   const logEl=document.getElementById("log");
   const startBtn=document.getElementById("startBtn");
   const preview=document.getElementById("preview");
+  const descInput = document.getElementById("user_text");
+  const descRequired = document.getElementById("descRequired");
+
+  descInput.addEventListener("input", () => {
+    if (descInput.value.trim()) {
+      descRequired.style.display = "none";
+    }
+  });
 
   function log(...a){ logEl.textContent+="\n"+a.join(" "); console.log(...a); }
   function warn(msg) { log("⚠️ " + msg); console.warn("⚠️ " + msg); }
@@ -399,12 +410,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     logEl.textContent=""; log("Starting record...");
 
     // 📝 Require Hazard Description
-    const desc = document.getElementById("user_text").value.trim();
-    if (!desc) {
-      showPopup("Error", "Hazard Description is required.");
-      startBtn.disabled=false;
-      return;
-    }
+  if (!desc) {
+    descRequired.style.display = "block";
+    showPopup("Error", "Hazard Description is required.");
+    startBtn.disabled=false;
+    return;
+  }
+
 
     // 📍 Require location
     let geo=null;
