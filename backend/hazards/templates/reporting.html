@@ -343,7 +343,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const preview=document.getElementById("preview");
   const descInput = document.getElementById("user_text");
   const descRequired = document.getElementById("descRequired");
-
+    if (descInput.value.trim()) {
+      descRequired.style.display = "none";
+    }
   descInput.addEventListener("input", () => {
     if (descInput.value.trim()) {
       descRequired.style.display = "none";
@@ -410,13 +412,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     logEl.textContent=""; log("Starting record...");
 
     // 📝 Require Hazard Description
-  if (!desc) {
-    descRequired.style.display = "block";
-    showPopup("Error", "Hazard Description is required.");
-    startBtn.disabled=false;
-    return;
-  }
-
+    const desc = document.getElementById("user_text").value.trim();
+    if (!desc) {
+      descRequired.style.display = "block";
+      showPopup("Error", "Hazard Description is required.");
+      startBtn.disabled=false;
+      return;
+    }
 
     // 📍 Require location
     let geo=null;
