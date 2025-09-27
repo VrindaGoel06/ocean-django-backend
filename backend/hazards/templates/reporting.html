@@ -216,116 +216,122 @@
     </div>
 
     <script>
-      async function checkLogin() {
-        try {
-          const resp = await fetch("/api/check-auth/", { credentials: "include" });
-          if (!resp.ok) return false;
-          const data = await resp.json();
-          return data.is_authenticated === true;
-        } catch {
-          return false;
-        }
-      }
+async function checkLogin() {
+  try {
+    const resp = await fetch("/api/check-auth/", { credentials: "include" });
+    if (!resp.ok) return false;
+    const data = await resp.json();
+    return data.is_authenticated === true;
+  } catch {
+    return false;
+  }
+}
 
-      function showPopup(title, message) {
-        document.getElementById("popupTitle").textContent = title;
-        document.getElementById("popupMessage").textContent = message;
-        document.getElementById("popup").style.display = "block";
-      }
+function showPopup(title, message) {
+  document.getElementById("popupTitle").textContent = title;
+  document.getElementById("popupMessage").textContent = message;
+  document.getElementById("popup").style.display = "block";
+}
+function closePopup() {
+  document.getElementById("popup").style.display = "none";
+}
+document.getElementById("popupClose").onclick = closePopup;
+window.onclick = function(e) {
+  if (e.target === document.getElementById("popup")) closePopup();
+};
 
-      function closePopup() {
-        document.getElementById("popup").style.display = "none";
-      }
-
-      document.getElementById("popupClose").onclick = closePopup;
-      window.onclick = function(e) {
-        if (e.target === document.getElementById("popup")) closePopup();
-      };
-
-      // Location popup function
-      function getLocationWithPopup() {
-        return new Promise((resolve) => {
-          const popup = document.getElementById("locationPopup");
-          popup.style.display = "block";
-
-          document.getElementById("locationAllow").onclick = () => {
-            popup.style.display = "none";
-
-            if (!navigator.geolocation) {
-              showPopup("Error", "Geolocation not supported by this browser.");
-              return resolve(null);
-            }
-
-            navigator.geolocation.getCurrentPosition(
-              pos => resolve({
-                lat: pos.coords.latitude,
-                lon: pos.coords.longitude,
-                alt: pos.coords.altitude,
-                acc: pos.coords.accuracy,
-                speed: pos.coords.speed,
-                heading: pos.coords.heading,
-                ts: new Date(pos.timestamp).toISOString()
-              }),
-              err => {
-                // keep asking until allowed
-                popup.style.display = "block";
-                resolve(null);
-              },
-              { enableHighAccuracy: true, timeout: 5000 }
-            );
-          };
-
-          document.getElementById("locationCancel").onclick = () => {
-            popup.style.display = "block"; // reopen, can't continue
-            resolve(null);
-          };
-        });
-      }
-
-      // Camera popup function
-      async function getCameraWithPopup() {
-        const popup = document.getElementById("cameraPopup");
-        popup.style.display = "block";
-
-        return new Promise((resolve) => {
-          async function tryCamera() {
-            try {
-              let stream;
-              try {
-                stream = await navigator.mediaDevices.getUserMedia({
-                  video: { facingMode: { exact: "environment" } },
-                  audio: true
-                });
-              } catch (err) {
-                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-              }
-              popup.style.display = "none";
-              resolve(stream);
-            } catch (err) {
-              popup.style.display = "block"; // keep showing until allowed
-            }
-          }
-          document.getElementById("cameraRetry").onclick = tryCamera;
-          tryCamera();
-        });
-      }
-
+// ✅ Login popup
 function showLoginPopup(onGuestContinue) {
   const popup = document.getElementById("loginPopup");
   popup.style.display = "block";
-
   document.getElementById("guestBtn").onclick = () => {
     popup.style.display = "none";
     if (onGuestContinue) onGuestContinue();
   };
-
   document.getElementById("loginBtn").onclick = () => {
     window.location.href = "/login";
   };
-
   window.onclick = function(e) {
     if (e.target === popup) popup.style.display = "none";
   };
+}
+
+// ✅ Location popup
+function getLocationWithPopup() {
+  return new Promise((resolve) => {
+    const popup = document.getElementById("locationPopup");
+    popup.style.display = "block";
+
+    document.getElementById("locationAllow").onclick = () => {
+      popup.style.display = "none";
+      if (!navigator.geolocation) {
+        showPopup("Error", "Geolocation not supported by this browser.");
+        return resolve(null);
+      }
+      navigator.geolocation.getCurrentPosition(
+        pos => resolve({
+          lat: pos.coords.latitude,
+          lon: pos.coords.longitude,
+          alt: pos.coords.altitude,
+          acc: pos.coords.accuracy,
+          speed: pos.coords.speed,
+          heading: pos.coords.heading,
+          ts: new Date(pos.timestamp).toISOString()
+        }),
+        err => {
+          popup.style.display = "block"; // keep asking
+          resolve(null);
+        },
+        { enableHighAccuracy: true, timeout: 5000 }
+      );
+    };
+
+    document.getElementById("locationCancel").onclick = () => {
+      popup.style.display = "block"; // can’t proceed without location
+      resolve(null);
+    };
+  });
+}
+
+// ✅ Camera popup
+async function getCameraWithPopup() {
+  const popup = document.getElementById("cameraPopup");
+  popup.style.display = "block";
+  return new Promise((resolve) => {
+    async function tryCamera() {
+      try {
+        let stream;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { exact: "environment" } },
+            audio: true
+          });
+        } catch (err) {
+          stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        }
+        popup.style.display = "none";
+        resolve(stream);
+      } catch (err) {
+        popup.style.display = "block"; // still blocked
+      }
+    }
+    document.getElementById("cameraRetry").onclick = tryCamera;
+    tryCamera();
+  });
+}
+
+// ✅ Request motion/orientation permissions (iOS Safari)
+async function requestSensorPermissions() {
+  try {
+    if (typeof DeviceMotionEvent !== "undefined" &&
+        typeof DeviceMotionEvent.requestPermission === "function") {
+      await DeviceMotionEvent.requestPermission().catch(()=>{});
+    }
+    if (typeof DeviceOrientationEvent !== "undefined" &&
+        typeof DeviceOrientationEvent.requestPermission === "function") {
+      await DeviceOrientationEvent.requestPermission().catch(()=>{});
+    }
+  } catch (_) {}
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -338,68 +344,65 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 (async () => {
-  const logEl=document.getElementById("log");
-  const startBtn=document.getElementById("startBtn");
-  const preview=document.getElementById("preview");
+  const logEl = document.getElementById("log");
+  const startBtn = document.getElementById("startBtn");
+  const preview = document.getElementById("preview");
   const descInput = document.getElementById("user_text");
   const descRequired = document.getElementById("descRequired");
-    if (descInput.value.trim()) {
-      descRequired.style.display = "none";
-    }
-  descInput.addEventListener("input", () => {
-    if (descInput.value.trim()) {
-      descRequired.style.display = "none";
-    }
-  });
 
   function log(...a){ logEl.textContent+="\n"+a.join(" "); console.log(...a); }
-  function warn(msg) { log("⚠️ " + msg); console.warn("⚠️ " + msg); }
+  function warn(msg){ log("⚠️ " + msg); console.warn("⚠️ " + msg); }
 
-  let accelData=[],gyroData=[],oriData=[],magData=[],baroData=[],startTime=null;
+  // 🔹 Sensor storage
+  let accelData=[], gyroData=[], oriData=[], magData=[], baroData=[];
+  let startTime=null;
+
   function relT(){ return (performance.now()-startTime)/1000; }
 
+  // 🔹 Event handlers
   function handleMotion(e){
-    if(!startTime) return;
+    if (!startTime) return;
     const t=relT();
-    const a=e.accelerationIncludingGravity||{x:0,y:0,z:0};
+    const a=e.accelerationIncludingGravity || {x:0,y:0,z:0};
     accelData.push([a.x||0,a.y||0,a.z||0,t]);
-    if(e.rotationRate){
-      gyroData.push([e.rotationRate.alpha||0,e.rotationRate.beta||0,e.rotationRate.gamma||0,t]);
+    if (e.rotationRate) {
+      gyroData.push([e.rotationRate.alpha||0, e.rotationRate.beta||0, e.rotationRate.gamma||0, t]);
     }
   }
   function handleOrientation(e){
-    if(!startTime) return;
+    if (!startTime) return;
     oriData.push([e.gamma||0,e.beta||0,e.alpha||0,relT()]);
   }
 
-  let magnetometer,barometer;
+  // 🔹 Magnetometer + Barometer
+  let magnetometer, barometer;
   function startMag(){
     try {
-      if("Magnetometer" in window){
+      if ("Magnetometer" in window){
         magnetometer=new Magnetometer({frequency:60});
-        magnetometer.addEventListener("reading",()=>{ magData.push([magnetometer.x||0,magnetometer.y||0,magnetometer.z||0,relT()]); });
+        magnetometer.addEventListener("reading",()=>{
+          magData.push([magnetometer.x||0,magnetometer.y||0,magnetometer.z||0,relT()]);
+        });
         magnetometer.start();
-      } else {
-        warn("Magnetometer not supported by this device/browser");
-      }
-    } catch(e) { warn("Magnetometer init failed: " + e.message); }
+      } else { warn("Magnetometer not supported"); }
+    } catch(e){ warn("Magnetometer init failed: "+e.message); }
   }
   function startBaro(){
     try {
-      if("Barometer" in window){
+      if ("Barometer" in window){
         barometer=new Barometer({frequency:1});
-        barometer.addEventListener("reading",()=>{ baroData.push([barometer.pressure||0,relT()]); });
+        barometer.addEventListener("reading",()=>{
+          baroData.push([barometer.pressure||0,relT()]);
+        });
         barometer.start();
-      } else {
-        warn("Barometer not supported by this device/browser");
-      }
-    } catch(e) { warn("Barometer init failed: " + e.message); }
+      } else { warn("Barometer not supported"); }
+    } catch(e){ warn("Barometer init failed: "+e.message); }
   }
 
   function downsample(series, targetHz=10){
-    if(!series.length) return [];
-    const duration=series[series.length-1][series[0].length-1];
-    const step=1/targetHz, out=[];
+    if (!series.length) return [];
+    const duration = series[series.length-1][series[0].length-1];
+    const step = 1/targetHz, out=[];
     for(let t=0;t<=duration;t+=step){
       let closest=series.reduce((a,b)=>Math.abs(b[b.length-1]-t)<Math.abs(a[a.length-1]-t)?b:a);
       out.push(closest);
@@ -407,37 +410,40 @@ document.addEventListener("DOMContentLoaded", async () => {
     return out;
   }
 
+  // 🔹 Main recorder
   async function recordAndSend(){
     startBtn.disabled=true;
     logEl.textContent=""; log("Starting record...");
 
-    // 📝 Require Hazard Description
-    const desc = document.getElementById("user_text").value.trim();
+    const desc = descInput.value.trim();
     if (!desc) {
-      descRequired.style.display = "block";
-      showPopup("Error", "Hazard Description is required.");
-      startBtn.disabled=false;
-      return;
+      descRequired.style.display="block";
+      showPopup("Error","Hazard Description is required.");
+      startBtn.disabled=false; return;
     }
 
-    // 📍 Require location
+    // 📍 Location
     let geo=null;
-    while (!geo) {
-      geo = await getLocationWithPopup();
-    }
+    while (!geo) geo = await getLocationWithPopup();
 
-    // 📷 Require camera
+    // 🎛️ Sensors
+    await requestSensorPermissions();
+    startTime = performance.now();
+    window.addEventListener("devicemotion", handleMotion, true);
+    window.addEventListener("deviceorientation", handleOrientation, true);
+    startMag(); startBaro();
+
+    // 📷 Camera
     let stream=null;
-    while (!stream) {
-      stream = await getCameraWithPopup();
-    }
+    while (!stream) stream = await getCameraWithPopup();
+    preview.srcObject = stream;
 
-    preview.srcObject=stream;
+    const videoTrack = stream.getVideoTracks()[0];
+    const settings = videoTrack ? videoTrack.getSettings() : {};
+
     const rec=new MediaRecorder(stream,{mimeType:"video/webm;codecs=vp8,opus"});
     const chunks=[];
     rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data);};
-
-    startTime=performance.now();
     rec.start();
     await new Promise(r=>setTimeout(r,10000));
     rec.stop();
@@ -447,41 +453,47 @@ document.addEventListener("DOMContentLoaded", async () => {
     const file=new File([blob],"hazard.webm",{type:"video/webm"});
     stream.getTracks().forEach(t=>t.stop());
 
-    const client_info={ userAgent:navigator.userAgent, platform:navigator.platform, language:navigator.language };
-    const track=stream.getVideoTracks()[0];
-    const settings=track.getSettings();
+    // stop sensors
+    try{ magnetometer?.stop(); }catch{}
+    try{ barometer?.stop(); }catch{}
+    window.removeEventListener("devicemotion", handleMotion, true);
+    window.removeEventListener("deviceorientation", handleOrientation, true);
+
+    // Warnings
     if (!settings.frameRate) warn("Frame rate not available");
     if (!preview.videoWidth || !preview.videoHeight) warn("Resolution not available");
-
     if (!oriData.length) warn("No orientation data captured");
+    if (!geo) warn("No geolocation data");
+    warn("Aperture/ISO/Lens not accessible from browser APIs");
+    warn("GPS fix type & satellites not available");
 
-    const lastOri=oriData.length?oriData.at(-1):[null,null,null];
+    const lastOri = oriData.length ? oriData.at(-1) : [null,null,null];
     const geovideo = {
-      device_model: "",
-      software_info: "",
-      location: geo ? `POINT(${geo.lon} ${geo.lat})` : null,
-      altitude: geo ? geo.alt : null,
-      gps_accuracy: geo ? geo.acc : null,
-      speed: geo ? geo.speed : null,
-      direction: geo ? geo.heading : null,
-      gps_fix_type: null,
-      num_satellites: null,
-      timestamp_utc: geo ? geo.ts : new Date().toISOString(),
-      orientation_roll: lastOri[0],
-      orientation_pitch: lastOri[1],
-      orientation_yaw: lastOri[2],
-      resolution: (preview.videoWidth && preview.videoHeight) ? `${preview.videoWidth}x${preview.videoHeight}` : null,
-      frame_rate: settings.frameRate ?? null,
-      aperture: null,
-      iso: null,
-      lens: null,
-      accelerometer: downsample(accelData, 10),
-      gyroscope: downsample(gyroData, 10),
-      magnetometer: downsample(magData, 10),
-      barometer: downsample(baroData, 1),
-      orientation_series: downsample(oriData, 10),
-      duration_sec: 10
+      device_model:"",
+      software_info:"",
+      location: geo?`POINT(${geo.lon} ${geo.lat})`:null,
+      altitude: geo?geo.alt:null,
+      gps_accuracy: geo?geo.acc:null,
+      speed: geo?geo.speed:null,
+      direction: geo?geo.heading:null,
+      gps_fix_type:null,
+      num_satellites:null,
+      timestamp_utc: geo?geo.ts:new Date().toISOString(),
+      orientation_roll:lastOri[0],
+      orientation_pitch:lastOri[1],
+      orientation_yaw:lastOri[2],
+      resolution:(preview.videoWidth&&preview.videoHeight)?`${preview.videoWidth}x${preview.videoHeight}`:null,
+      frame_rate:settings?.frameRate??null,
+      aperture:null, iso:null, lens:null,
+      accelerometer:downsample(accelData,10),
+      gyroscope:downsample(gyroData,10),
+      magnetometer:downsample(magData,10),
+      barometer:downsample(baroData,1),
+      orientation_series:downsample(oriData,10),
+      duration_sec:10
     };
+
+    const client_info={ userAgent:navigator.userAgent, platform:navigator.platform, language:navigator.language };
 
     const fd=new FormData();
     fd.append("user_text",desc);
@@ -492,18 +504,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     log("Sending report...");
     try {
-      const resp = await fetch("/api/user-reports/", { method: "POST", body: fd });
-      const text = await resp.text();
-      log("Response:", resp.status, text);
-
-      if (resp.ok) {
-        window.location.href = "/report_submit";
+      const resp=await fetch("/api/user-reports/",{method:"POST",body:fd});
+      const text=await resp.text();
+      log("Response:",resp.status,text);
+      if (resp.status===201){
+        window.location.href="/hello";
+      } else if (resp.status===400){
+        showPopup("Error",text);
       } else {
-        showPopup("Unexpected response: " + resp.status, text);
+        showPopup("Unexpected response: "+resp.status,text);
       }
-    } catch (e) {
-      log("Upload error:", e);
-      showPopup("Network error", e.message);
+    } catch(e){
+      log("Upload error:",e);
+      showPopup("Network error",e.message||"Failed to connect");
     }
     startBtn.disabled=false;
   }
