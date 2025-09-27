@@ -508,7 +508,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const text=await resp.text();
       log("Response:",resp.status,text);
       if (resp.status===201){
-        window.location.href="/hello";
+        window.location.href="/report_submit";
       } else if (resp.status===400){
         showPopup("Error",text);
       } else {
